@@ -11,6 +11,7 @@ streamlit-chat = "^0.0.2.2"
 langchain = "^0.0.173"
 psycopg2 = "^2.9.6"
 openai = "^0.27.6"
+psycopg2-binary = "^2.9.6"
 
 
 [build-system]
