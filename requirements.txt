@@ -1,1 +1,5 @@
+streamlit-chat
+langchain
+psycopg2
 psycopg2-binary
+openai
