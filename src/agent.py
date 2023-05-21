@@ -16,5 +16,5 @@ toolkit = SQLDatabaseToolkit(llm=open_ai, db=db)
 agent = create_sql_agent(
     llm=open_ai,
     toolkit=toolkit,
-    verbose=False
+    verbose=True
 )
