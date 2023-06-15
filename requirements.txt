@@ -2,3 +2,4 @@ streamlit-chat
 langchain
 psycopg2-binary
 openai
+pyodbc
