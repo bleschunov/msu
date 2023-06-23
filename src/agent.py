@@ -9,12 +9,15 @@ db_uri = st.secrets.DB_URI
 openai_api_key = st.secrets.OPENAI_API_KEY
 
 open_ai = OpenAI(model_name="gpt-3.5-turbo-16k", temperature=0, openai_api_key=openai_api_key, verbose=True, max_tokens=3000)
+custom_context = open("src/custom_context.txt", "r").read()
+default_context = open("src/default_context.txt", "r").read()
 
 db = SQLDatabase.from_uri(db_uri)
 toolkit = SQLDatabaseToolkit(llm=open_ai, db=db)
 
 agent = create_sql_agent(
+    prefix=default_context + custom_context,
     llm=open_ai,
     toolkit=toolkit,
-    verbose=False
+    verbose=True
 )
