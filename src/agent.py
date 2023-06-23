@@ -8,7 +8,7 @@ from langchain.llms.openai import OpenAI
 db_uri = st.secrets.DB_URI
 openai_api_key = st.secrets.OPENAI_API_KEY
 
-open_ai = OpenAI(temperature=0, openai_api_key=openai_api_key)
+open_ai = OpenAI(model_name="gpt-3.5-turbo-16k", temperature=0, openai_api_key=openai_api_key, verbose=True, max_tokens=3000)
 
 db = SQLDatabase.from_uri(db_uri)
 toolkit = SQLDatabaseToolkit(llm=open_ai, db=db)
