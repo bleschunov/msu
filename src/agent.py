@@ -1,23 +1,42 @@
-import streamlit as st
+import os
+from langchain import SQLDatabase, SQLDatabaseChain, LLMChain, OpenAI
+from langchain.agents import ZeroShotAgent, AgentExecutor
+from langchain.memory import ConversationBufferMemory
+from langchain.chat_models import ChatOpenAI
+from langchain.tools import Tool
 
-from langchain.agents import create_sql_agent
-from langchain.agents.agent_toolkits import SQLDatabaseToolkit
-from langchain.sql_database import SQLDatabase
-from langchain.llms.openai import OpenAI
+memory = ConversationBufferMemory(memory_key="chat_history")
+db = SQLDatabase.from_uri(os.getenv("DB_URI"), include_tables=['test'])
+print(db.table_info)
+llm = OpenAI(temperature=0, verbose=True)
+db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
 
-db_uri = st.secrets.DB_URI
-openai_api_key = st.secrets.OPENAI_API_KEY
+tools = [
+    Tool(
+        name="SQL",
+        func=db_chain.run,
+        description="useful for when you need to extract information from database",
+    )
+]
 
-open_ai = OpenAI(model_name="gpt-3.5-turbo-16k", temperature=0, openai_api_key=openai_api_key, verbose=True, max_tokens=3000)
-custom_context = open("src/custom_context.txt", "r").read()
-default_context = open("src/default_context.txt", "r").read()
+prefix = """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
+suffix = """Begin!"
 
-db = SQLDatabase.from_uri(db_uri)
-toolkit = SQLDatabaseToolkit(llm=open_ai, db=db)
+{chat_history}
+Question: {input}
+{agent_scratchpad}"""
 
-agent = create_sql_agent(
-    prefix=default_context + custom_context,
-    llm=open_ai,
-    toolkit=toolkit,
-    verbose=True
+prompt = ZeroShotAgent.create_prompt(
+    tools,
+    prefix=prefix,
+    suffix=suffix,
+    input_variables=["input", "chat_history", "agent_scratchpad"],
 )
+
+llm_chain = LLMChain(llm=ChatOpenAI(temperature=0), prompt=prompt)
+_agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True)
+agent = AgentExecutor.from_agent_and_tools(
+    agent=_agent, tools=tools, verbose=True, memory=memory, handle_parsing_errors=True
+)
+
+print(agent.run("Сколько компания заработала за всё время?"))
