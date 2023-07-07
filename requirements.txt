@@ -3,3 +3,4 @@ langchain
 psycopg2-binary
 openai
 pyodbc
+tiktoken
