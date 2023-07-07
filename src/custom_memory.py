@@ -30,6 +30,9 @@ class CustomMemory:
         self.messages.append(message)
         return self
 
+    def reset(self):
+        self.messages.clear()
+
     def __repr__(self):
         return self.get_memory()
 

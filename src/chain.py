@@ -14,5 +14,5 @@ llm = ChatOpenAI(temperature=0, verbose=False, max_tokens=512)
 # use_query_checker используем для обработки неправильно составленных SQL запросов
 # Используем кастомный промпт, чтобы указать в нём особенности нашей таблицы
 db_chain = SQLDatabaseChain.from_llm(
-    llm, db, verbose=True, use_query_checker=False
+    llm, db, use_query_checker=False
 )
