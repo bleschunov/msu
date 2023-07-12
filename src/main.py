@@ -35,11 +35,13 @@ def initialize():
     if not SESS_STATE:
         # slow imports made here
         from chain import db_chain
+
         SESS_STATE.sql_chain_executor = SQLDatabaseChainExecutor(
-            db_chain, custom_memory, debug=False)
+            db_chain, custom_memory, debug=False
+        )
 
         st.session_state.msg_list: List[Message] = []
-        greeting_message = Message('Привет! Какой у вас запрос?', False)
+        greeting_message = Message("Привет! Какой у вас запрос?", False)
         st.session_state.msg_list.append(greeting_message)
 
 
@@ -72,9 +74,11 @@ with messages_container:
     reprint_messages_from_msg_list()
 
 with st.container():
-    st.text_input('Ваш запрос', '',
-                  on_change=on_input_change, key='user_input')
+    st.text_input("Ваш запрос", "", on_change=on_input_change, key="user_input")
 
     st.button("Сбросить контекст", on_click=reset)
-    st.write("История сообщений: " +
-             str(SESS_STATE.sql_chain_executor.get_chat_history_size()) + " токенов из ~16K")
+    st.write(
+        "История сообщений: "
+        + str(SESS_STATE.sql_chain_executor.get_chat_history_size())
+        + " токенов из ~16K"
+    )

@@ -24,8 +24,8 @@ class SQLDatabaseChainExecutor:
         query_with_chat_history = self.memory.get_memory() + query
         if self.return_intermediate_steps:
             r = self.db_chain(query_with_chat_history)
-            chain_answer = r.get('result', None)
-            self.last_intermediate_steps = r.get('intermediate_steps', None)
+            chain_answer = r.get("result", None)
+            self.last_intermediate_steps = r.get("intermediate_steps", None)
         else:
             chain_answer = self.db_chain.run(query_with_chat_history)
 
@@ -37,15 +37,15 @@ class SQLDatabaseChainExecutor:
             print("Final answer:\n" + chain_answer)
             print("\n=====\n")
 
-        self.memory \
-            .add_message(HumanMessage(query)) \
-            .add_message(AiMessage(chain_answer))
+        self.memory.add_message(HumanMessage(query)).add_message(
+            AiMessage(chain_answer)
+        )
 
         return chain_answer
 
     def get_chat_history_size(self):
         return self.db_chain.llm_chain.llm.get_num_tokens(self.memory.get_memory())
-    
+
     def get_last_intermediate_steps(self):
         return self.last_intermediate_steps
 

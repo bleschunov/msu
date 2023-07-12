@@ -24,7 +24,9 @@ class CustomMemory:
     def get_memory(self):
         if len(self.messages) == 0:
             return ""
-        return "Chat history:\n" + "".join([message.get_message() for message in self.messages])
+        return "Chat history:\n" + "".join(
+            [message.get_message() for message in self.messages]
+        )
 
     def add_message(self, message: AiMessage | HumanMessage):
         self.messages.append(message)
