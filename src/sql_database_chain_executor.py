@@ -12,14 +12,22 @@ class SQLDatabaseChainExecutor:
     debug: bool = False
     langchain_debug: bool = False
     verbose: bool = False
+    return_intermediate_steps: bool = False
 
     def __post_init__(self):
         langchain.debug = self.langchain_debug
         self.db_chain.verbose = self.verbose
+        self.db_chain.return_intermediate_steps = self.return_intermediate_steps
+        self.last_intermediate_steps = None
 
     def run(self, query):
         query_with_chat_history = self.memory.get_memory() + query
-        chain_answer = self.db_chain.run(query_with_chat_history)
+        if self.return_intermediate_steps:
+            r = self.db_chain(query_with_chat_history)
+            chain_answer = r.get('result', None)
+            self.last_intermediate_steps = r.get('intermediate_steps', None)
+        else:
+            chain_answer = self.db_chain.run(query_with_chat_history)
 
         if self.debug:
             print("Final query:\n" + query_with_chat_history)
@@ -37,6 +45,9 @@ class SQLDatabaseChainExecutor:
 
     def get_chat_history_size(self):
         return self.db_chain.llm_chain.llm.get_num_tokens(self.memory.get_memory())
+    
+    def get_last_intermediate_steps(self):
+        return self.last_intermediate_steps
 
     def reset(self):
         self.memory.reset()
