@@ -1,6 +1,7 @@
 import os
 from langchain import SQLDatabase, SQLDatabaseChain
 from langchain.chat_models import ChatOpenAI
+from custom_prompt import custom_prompt
 
 # Создаём подключение к БД
 # include_tables используем для указания таблиц, с которыми хотим работать
@@ -15,5 +16,5 @@ llm = ChatOpenAI(temperature=0, verbose=False, max_tokens=512, model_name="gpt-3
 # use_query_checker=False, потому что True с моделью на 16К токенов ломает чейн
 # Используем кастомный промпт, чтобы указать в нём особенности нашей таблицы
 db_chain = SQLDatabaseChain.from_llm(
-    llm, db, use_query_checker=False
+    llm, db, prompt=custom_prompt, use_query_checker=False
 )
