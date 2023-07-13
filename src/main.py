@@ -1,6 +1,8 @@
 import uuid
+from abc import abstractmethod
+
+import pandas as pd
 from dataclasses import dataclass
-from typing import List
 
 import streamlit as st
 from streamlit_chat import message
@@ -13,22 +15,32 @@ SESS_STATE = st.session_state
 messages_container = st.container()
 
 
+class Displayable:
+    @abstractmethod
+    def display(self):
+        pass
+
+
 @dataclass
-class Message:
+class Message(Displayable):
     text: str
     is_user: bool
-    key: str = None
 
-    def __post_init__(self):
-        self.key = uuid.uuid4().hex
+    def display(self):
+        message(self.text, self.is_user, key=uuid.uuid4().hex)
 
-    def make_st_message(self, key=None):
-        message(self.text, self.is_user, key=self.key if not key else key)
+
+@dataclass
+class Table(Displayable):
+    df: pd.DataFrame
+
+    def display(self):
+        st.table(self.df)
 
 
 def reprint_messages_from_msg_list():
     for n, msg in enumerate(st.session_state.msg_list):
-        msg.make_st_message(n)
+        msg.display()
 
 
 def initialize():
@@ -40,7 +52,7 @@ def initialize():
             db_chain, custom_memory, debug=False
         )
 
-        st.session_state.msg_list: List[Message] = []
+        st.session_state.msg_list = []
         greeting_message = Message("Привет! Какой у вас запрос?", False)
         st.session_state.msg_list.append(greeting_message)
 
@@ -59,13 +71,21 @@ def on_input_change():
         st.session_state.msg_list.append(query_message)
 
         with messages_container:
-            query_message.make_st_message()
+            query_message.display()
 
         st.session_state["input_text"] = ""
 
-        answer = SESS_STATE.sql_chain_executor.run(query)
+        answer, df = SESS_STATE.sql_chain_executor.run(query).get_all()
+
         answer_message = Message(answer, False)
         st.session_state.msg_list.append(answer_message)
+
+        table = Table(df)
+        st.session_state.msg_list.append(table)
+
+        with messages_container:
+            message(answer_message.text, answer_message.is_user, key=uuid.uuid4().hex)
+            st.table(df)
 
 
 initialize()
@@ -75,7 +95,6 @@ with messages_container:
 
 with st.container():
     st.text_input("Ваш запрос", "", on_change=on_input_change, key="user_input")
-
     st.button("Сбросить контекст", on_click=reset)
     st.write(
         "История сообщений: "

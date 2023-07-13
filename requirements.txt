@@ -2,3 +2,5 @@ streamlit-chat
 langchain
 openai
 pyodbc
+tiktoken
+pandas
