@@ -13,6 +13,7 @@ openai = "^0.27.6"
 psycopg2-binary = "^2.9.6"
 langchain = "^0.0.222"
 tiktoken = "^0.4.0"
+pandas = "^2.0.3"
 
 
 [build-system]
