@@ -194,4 +194,6 @@ fabric.properties
 Pipfile*
 
 # misc
-*.txt
+src/tools/*.txt
+src/tools/*.json
+src/tools/*.xlsx

@@ -1,12 +1,9 @@
 import uuid
-from abc import abstractmethod
 
 import pandas as pd
-from dataclasses import dataclass
-
 import streamlit as st
+from dataclasses import dataclass
 from streamlit_chat import message
-
 
 from custom_memory import custom_memory
 from sql_database_chain_executor import SQLDatabaseChainExecutor
@@ -15,31 +12,29 @@ SESS_STATE = st.session_state
 messages_container = st.container()
 
 
-class Displayable:
-    @abstractmethod
-    def display(self):
-        pass
-
-
 @dataclass
-class Message(Displayable):
+class Message:
     text: str
     is_user: bool
+    key: str = None
+    table: pd.DataFrame = None
+    sql_query: str = None
+
+    def __post_init__(self):
+        self.key = uuid.uuid4().hex
 
     def display(self):
-        message(self.text, self.is_user, key=uuid.uuid4().hex)
+        text = self.text
+        if self.sql_query:
+            text += "\n" + f"~~~sql\n{self.sql_query}\n~~~"
+        if self.table is not None:
+            text += "\n" + self.table.to_markdown(index=False, floatfmt=".3f")
 
-
-@dataclass
-class Table(Displayable):
-    df: pd.DataFrame
-
-    def display(self):
-        st.table(self.df)
+        message(text, self.is_user, key=self.key)
 
 
 def reprint_messages_from_msg_list():
-    for n, msg in enumerate(st.session_state.msg_list):
+    for msg in st.session_state.msg_list:
         msg.display()
 
 
@@ -49,12 +44,12 @@ def initialize():
         from chain import db_chain
 
         SESS_STATE.sql_chain_executor = SQLDatabaseChainExecutor(
-            db_chain, custom_memory, debug=False
+            db_chain, custom_memory, debug=False, return_intermediate_steps=True
         )
 
-        st.session_state.msg_list = []
+        SESS_STATE.msg_list = []
         greeting_message = Message("Привет! Какой у вас запрос?", False)
-        st.session_state.msg_list.append(greeting_message)
+        SESS_STATE.msg_list.append(greeting_message)
 
 
 def reset():
@@ -64,7 +59,7 @@ def reset():
     st.session_state.msg_list.append(reset_message)
 
 
-def on_input_change():
+def on_input():
     query = st.session_state.user_input
     if query:
         query_message = Message(query, True)
@@ -77,15 +72,14 @@ def on_input_change():
 
         answer, df = SESS_STATE.sql_chain_executor.run(query).get_all()
 
-        answer_message = Message(answer, False)
+        intermediate_steps = SESS_STATE.sql_chain_executor.get_last_intermediate_steps()
+        answer_message = Message(
+            answer, False, table=df, sql_query=intermediate_steps[1]
+        )
         st.session_state.msg_list.append(answer_message)
 
-        table = Table(df)
-        st.session_state.msg_list.append(table)
-
         with messages_container:
-            message(answer_message.text, answer_message.is_user, key=uuid.uuid4().hex)
-            st.table(df)
+            answer_message.display()
 
 
 initialize()
@@ -94,7 +88,12 @@ with messages_container:
     reprint_messages_from_msg_list()
 
 with st.container():
-    st.text_input("Ваш запрос", "", on_change=on_input_change, key="user_input")
+    with st.form("query_form", clear_on_submit=True):
+        st.text_input("Ваш запрос", "", key="user_input")
+        submitted = st.form_submit_button("Отправить")
+        if submitted:
+            on_input()
+
     st.button("Сбросить контекст", on_click=reset)
     st.write(
         "История сообщений: "

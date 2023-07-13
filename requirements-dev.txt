@@ -5,3 +5,4 @@ pyodbc
 tiktoken
 pandas
 tabulate
+openpyxl
