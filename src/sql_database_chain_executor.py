@@ -1,6 +1,8 @@
-from dataclasses import dataclass
-
+import json
+import pandas as pd
 import langchain
+
+from dataclasses import dataclass
 from langchain import SQLDatabaseChain
 from custom_memory import CustomMemory, HumanMessage, AiMessage
 
@@ -9,6 +11,7 @@ from custom_memory import CustomMemory, HumanMessage, AiMessage
 class SQLDatabaseChainExecutor:
     db_chain: SQLDatabaseChain
     memory: CustomMemory
+    chain_answer: dict = None
     debug: bool = False
     langchain_debug: bool = False
     verbose: bool = False
@@ -33,7 +36,18 @@ class SQLDatabaseChainExecutor:
             .add_message(HumanMessage(query)) \
             .add_message(AiMessage(chain_answer))
 
-        return chain_answer
+        self.chain_answer = json.loads(chain_answer)
+        
+        return self
+    
+    def get_answer(self):
+        return self.chain_answer["Answer"]
+    
+    def get_df(self):
+        return pd.DataFrame(self.chain_answer["SQLResult"])
+    
+    def get_all(self):
+        return self.get_answer(), self.get_df()
 
     def get_chat_history_size(self):
         return self.db_chain.llm_chain.llm.get_num_tokens(self.memory.get_memory())

@@ -1,4 +1,7 @@
 import uuid
+from abc import abstractmethod
+
+import pandas as pd
 from dataclasses import dataclass
 
 import streamlit as st
@@ -12,15 +15,32 @@ executor = SQLDatabaseChainExecutor(db_chain, custom_memory, debug=False)
 messages_container = st.container()
 
 
+class Displayable:
+    @abstractmethod
+    def display(self):
+        pass
+
+
 @dataclass
-class Message:
+class Message(Displayable):
     text: str
     is_user: bool
+
+    def display(self):
+        message(self.text, self.is_user, key=uuid.uuid4().hex)
+
+
+@dataclass
+class Table(Displayable):
+    df: pd.DataFrame
+
+    def display(self):
+        st.table(self.df)
 
 
 def print_messages():
     for msg in st.session_state.msg_list:
-        message(msg.text, msg.is_user, key=uuid.uuid4().hex)
+        msg.display()
 
 
 def reset():
@@ -53,12 +73,17 @@ if query:
 
     st.session_state["input_text"] = ""
 
-    answer = executor.run(query)
+    answer, df = executor.run(query).get_all()
+
     answer_message = Message(answer, False)
     st.session_state.msg_list.append(answer_message)
 
+    table = Table(df)
+    st.session_state.msg_list.append(table)
+
     with messages_container:
         message(answer_message.text, answer_message.is_user, key=uuid.uuid4().hex)
+        st.table(df)
 
 st.button("Сбросить контекст", on_click=reset)
 

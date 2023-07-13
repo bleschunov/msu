@@ -17,6 +17,10 @@ SQLQuery: SQL Query to run
 SQLResult: Result of the SQLQuery
 Answer: Final answer here
 
+Return answer in proper json format with the following keys:
+
+SQLResult: Result of the SQLQuery
+Answer: Final answer here
 """
 
 custom_prompt = PromptTemplate(
