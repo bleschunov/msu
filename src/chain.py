@@ -15,4 +15,5 @@ llm = ChatOpenAI(temperature=0, verbose=False, max_tokens=512, model_name="gpt-3
 # use_query_checker используем для обработки неправильно составленных SQL запросов
 # use_query_checker=False, потому что True с моделью на 16К токенов ломает чейн
 # Используем кастомный промпт, чтобы указать в нём особенности нашей таблицы
+
 db_chain = SQLDatabaseChain.from_llm(llm, db, prompt=custom_prompt, use_query_checker=False)
