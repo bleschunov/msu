@@ -25,5 +25,5 @@ Answer: Final answer here
 
 custom_prompt = PromptTemplate(
     input_variables=["input", "table_info", "top_k"],
-    template=_custom_prompt + _prompt_suffix
+    template=_custom_prompt + _prompt_suffix,
 )
