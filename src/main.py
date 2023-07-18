@@ -1,90 +1,102 @@
 import uuid
-from abc import abstractmethod
 
 import pandas as pd
-from dataclasses import dataclass
-
 import streamlit as st
+from dataclasses import dataclass
 from streamlit_chat import message
 
-from chain import db_chain
 from custom_memory import custom_memory
 from sql_database_chain_executor import SQLDatabaseChainExecutor
 
-executor = SQLDatabaseChainExecutor(db_chain, custom_memory, debug=False)
+SESS_STATE = st.session_state
 messages_container = st.container()
 
 
-class Displayable:
-    @abstractmethod
-    def display(self):
-        pass
-
-
 @dataclass
-class Message(Displayable):
+class Message:
     text: str
     is_user: bool
+    key: str = None
+    table: pd.DataFrame = None
+    sql_query: str = None
+
+    def __post_init__(self):
+        self.key = uuid.uuid4().hex
 
     def display(self):
-        message(self.text, self.is_user, key=uuid.uuid4().hex)
+        text = self.text
+        if self.sql_query:
+            text += "\n" + f"~~~sql\n{self.sql_query}\n~~~"
+        if self.table is not None:
+            text += "\n" + self.table.to_markdown(index=False, floatfmt=".3f")
+
+        message(text, self.is_user, key=self.key)
 
 
-@dataclass
-class Table(Displayable):
-    df: pd.DataFrame
-
-    def display(self):
-        st.table(self.df)
-
-
-def print_messages():
+def reprint_messages_from_msg_list():
     for msg in st.session_state.msg_list:
         msg.display()
 
 
+def initialize():
+    if not SESS_STATE:
+        # slow imports made here
+        from chain import db_chain
+
+        SESS_STATE.sql_chain_executor = SQLDatabaseChainExecutor(
+            db_chain, custom_memory, debug=False, return_intermediate_steps=True
+        )
+
+        SESS_STATE.msg_list = []
+        greeting_message = Message("Привет! Какой у вас запрос?", False)
+        SESS_STATE.msg_list.append(greeting_message)
+
+
 def reset():
-    executor.reset()
+    SESS_STATE.sql_chain_executor.reset()
 
     reset_message = Message("Контекст сброшен", False)
     st.session_state.msg_list.append(reset_message)
 
-    with messages_container:
-        message(reset_message.text, reset_message.is_user, key=uuid.uuid4().hex)
+
+def on_input():
+    query = st.session_state.user_input
+    if query:
+        query_message = Message(query, True)
+        st.session_state.msg_list.append(query_message)
+
+        with messages_container:
+            query_message.display()
+
+        st.session_state["input_text"] = ""
+
+        answer, df = SESS_STATE.sql_chain_executor.run(query).get_all()
+
+        intermediate_steps = SESS_STATE.sql_chain_executor.get_last_intermediate_steps()
+        answer_message = Message(
+            answer, False, table=df, sql_query=intermediate_steps[1]
+        )
+        st.session_state.msg_list.append(answer_message)
+
+        with messages_container:
+            answer_message.display()
 
 
-if "msg_list" not in st.session_state:
-    st.session_state.msg_list = []
-
-if len(st.session_state.msg_list) == 0:
-    st.session_state["msg_list"].append(Message('Привет! Какой у вас запрос?', False))
+initialize()
 
 with messages_container:
-    print_messages()
+    reprint_messages_from_msg_list()
 
-query = st.text_input('Ваш запрос', '')
+with st.container():
+    with st.form("query_form", clear_on_submit=True):
+        st.text_input("Ваш запрос", "", key="user_input")
+        submitted = st.form_submit_button("Отправить")
+        if submitted:
+            on_input()
 
-if query:
-    query_message = Message(query, True)
-    st.session_state.msg_list.append(query_message)
-
-    with messages_container:
-        message(query_message.text, query_message.is_user, key=uuid.uuid4().hex)
-
-    st.session_state["input_text"] = ""
-
-    answer, df = executor.run(query).get_all()
-
-    answer_message = Message(answer, False)
-    st.session_state.msg_list.append(answer_message)
-
-    table = Table(df)
-    st.session_state.msg_list.append(table)
-
-    with messages_container:
-        message(answer_message.text, answer_message.is_user, key=uuid.uuid4().hex)
-        st.table(df)
-
-st.button("Сбросить контекст", on_click=reset)
-
-st.write("История сообщений: " + str(executor.get_chat_history_size()) + " токенов из ~16K")
+    st.button("Сбросить контекст", on_click=reset)
+    st.write(
+        "История сообщений: "
+        + str(SESS_STATE.sql_chain_executor.get_chat_history_size())
+        + " токенов из ~16K"
+    )

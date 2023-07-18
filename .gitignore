@@ -186,3 +186,14 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 # .idea
+
+# vscode
+.vscode*
+
+# pipenv
+Pipfile*
+
+# misc
+src/tools/*.txt
+src/tools/*.json
+src/tools/*.xlsx
