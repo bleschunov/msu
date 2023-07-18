@@ -4,11 +4,7 @@ from sql_database_chain_executor import SQLDatabaseChainExecutor
 
 
 executor = SQLDatabaseChainExecutor(
-    db_chain, custom_memory, debug=False, verbose=False, return_intermediate_steps=True
+    db_chain, custom_memory, debug=True, verbose=False, return_intermediate_steps=True
 )
 
-executor.run("Топ 5 компаний по доходу за 2023 год")
-executor.run("Какая из этих компаний заработала больше всего?")
-executor.run("Сколько она заработала за 2023?")
-executor.reset()
-executor.run("Какой контрагент перевёл больше всего денег?")
+executor.run("Сколько мы всего заработали?")

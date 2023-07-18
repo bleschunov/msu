@@ -5,7 +5,7 @@ from custom_prompt import custom_prompt
 
 # Создаём подключение к БД
 # include_tables используем для указания таблиц, с которыми хотим работать
-db = SQLDatabase.from_uri(os.getenv("DB_URI"), include_tables=["test"])
+db = SQLDatabase.from_uri(os.getenv("DB_URI"))
 
 # Создаём ЛЛМ–модель для работы цепочки для работы с SQL
 # max_tokens=-1 указывает, что лимит токенов будет подстраиватья под запрос динамически
