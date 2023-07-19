@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -19,7 +20,7 @@ class AiMessage:
 
 class CustomMemory:
     def __init__(self):
-        self.messages: list[AiMessage | HumanMessage] = []
+        self.messages: list[Optional[AiMessage | HumanMessage]] = []
 
     def get_memory(self):
         if len(self.messages) == 0:
@@ -28,7 +29,7 @@ class CustomMemory:
             [message.get_message() for message in self.messages]
         )
 
-    def add_message(self, message: AiMessage | HumanMessage):
+    def add_message(self, message: Optional[AiMessage | HumanMessage]):
         self.messages.append(message)
         return self
 

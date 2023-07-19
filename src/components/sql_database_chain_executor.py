@@ -1,6 +1,9 @@
 import json
+import logging
 import pandas as pd
 import langchain
+import re
+from typing import Optional, Dict, List, Tuple
 
 from dataclasses import dataclass
 from langchain import SQLDatabaseChain
@@ -23,14 +26,30 @@ class SQLDatabaseChainExecutor:
         self.db_chain.return_intermediate_steps = self.return_intermediate_steps
         self.last_intermediate_steps = None
 
+    @staticmethod
+    def _parse_table_from_str(text):
+        pattern_replacement = (
+            (r"(?<=[[ ])\((?=')", "["),
+            (r"(?<=\))\)", "]"),
+            (r"\'", '"'),
+        )
+        text_mod = text
+        for pattern, repl in pattern_replacement:
+            text_mod = re.sub(pattern, repl, text_mod)
+        return json.loads(text_mod)
+
     def run(self, query):
         query_with_chat_history = self.memory.get_memory() + query
-        if self.return_intermediate_steps:
-            r = self.db_chain(query_with_chat_history)
-            chain_answer = r.get("result", None)
-            self.last_intermediate_steps = r.get("intermediate_steps", None)
-        else:
-            chain_answer = self.db_chain.run(query_with_chat_history)
+        try:
+            if self.return_intermediate_steps:
+                r = self.db_chain(query_with_chat_history)
+                chain_answer = r.get("result", None)
+                self.last_intermediate_steps = r.get("intermediate_steps", None)
+            else:
+                chain_answer = self.db_chain.run(query_with_chat_history)
+        except Exception as e:
+            logging.error(e)
+            chain_answer = "Произошла ошибка"
 
         if self.debug:
             print("Final query:\n" + query_with_chat_history)
@@ -43,25 +62,37 @@ class SQLDatabaseChainExecutor:
         self.memory.add_message(HumanMessage(query)).add_message(
             AiMessage(chain_answer)
         )
+        try:
+            self.chain_answer = json.loads(chain_answer)
+        except json.JSONDecodeError:
+            self.chain_answer = {
+                "Answer": chain_answer if isinstance(chain_answer, str) else None
+            }
 
-        self.chain_answer = json.loads(chain_answer)
-        
         return self
-    
-    def get_answer(self):
-        return self.chain_answer["Answer"]
-    
-    def get_df(self):
-        return pd.DataFrame(self.chain_answer["SQLResult"])
-    
-    def get_all(self):
+
+    def get_answer(self) -> Optional[str | None]:
+        if isinstance(self.chain_answer, dict):
+            return self.chain_answer.get("Answer")
+        else:
+            return self.chain_answer
+
+    def get_df(self) -> Optional[pd.DataFrame | None]:
+        sqlres = self.chain_answer.get("SQLResult")
+        return (
+            pd.DataFrame(sqlres)
+            if sqlres and isinstance(sqlres, (dict, list))
+            else None
+        )
+
+    def get_all(self) -> Tuple[Optional[str | None], Optional[pd.DataFrame | None]]:
         return self.get_answer(), self.get_df()
 
-    def get_chat_history_size(self):
+    def get_chat_history_size(self) -> int:
         return self.db_chain.llm_chain.llm.get_num_tokens(self.memory.get_memory())
 
-    def get_last_intermediate_steps(self):
+    def get_last_intermediate_steps(self) -> List[Optional[Dict | str]]:
         return self.last_intermediate_steps
 
-    def reset(self):
+    def reset(self) -> None:
         self.memory.reset()

@@ -23,7 +23,9 @@ def initialize():
         )
 
         SESS_STATE.msg_list = []
-        greeting_message = Message([SimpleText("Привет! Какой у вас запрос?")], is_user=False)
+        greeting_message = Message(
+            [SimpleText("Привет! Какой у вас запрос?")], is_user=False
+        )
         SESS_STATE.msg_list.append(greeting_message)
 
 
@@ -48,7 +50,14 @@ def on_input():
         answer, df = SESS_STATE.sql_chain_executor.run(query).get_all()
 
         intermediate_steps = SESS_STATE.sql_chain_executor.get_last_intermediate_steps()
-        answer_message = Message([SimpleText(answer), SqlCode(intermediate_steps[1]), Table(df)], is_user=False)
+        answer_message = Message(
+            [
+                SimpleText(answer),
+                SqlCode(intermediate_steps[1] if intermediate_steps else None),
+                Table(df),
+            ],
+            is_user=False,
+        )
         st.session_state.msg_list.append(answer_message)
 
         with messages_container:
