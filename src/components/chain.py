@@ -1,7 +1,7 @@
 import os
 from langchain import SQLDatabase, SQLDatabaseChain
 from langchain.chat_models import ChatOpenAI
-from custom_prompt import custom_prompt
+from components.custom_prompt import custom_prompt
 
 # Создаём подключение к БД
 # include_tables используем для указания таблиц, с которыми хотим работать

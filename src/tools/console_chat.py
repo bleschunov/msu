@@ -1,8 +1,8 @@
 import sys
 import signal
-from chain import db_chain
-from custom_memory import custom_memory
-from sql_database_chain_executor import SQLDatabaseChainExecutor
+from components.chain import db_chain
+from components.custom_memory import custom_memory
+from components.sql_database_chain_executor import SQLDatabaseChainExecutor
 
 """
 Консольный вариант чата с языковой моделью

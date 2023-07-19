@@ -4,7 +4,7 @@ import langchain
 
 from dataclasses import dataclass
 from langchain import SQLDatabaseChain
-from custom_memory import CustomMemory, HumanMessage, AiMessage
+from components.custom_memory import CustomMemory, HumanMessage, AiMessage
 
 
 @dataclass
