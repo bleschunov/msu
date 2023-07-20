@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 import langchain
 import re
-from typing import Optional, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 from dataclasses import dataclass
 from langchain import SQLDatabaseChain
@@ -14,7 +14,7 @@ from components.custom_memory import CustomMemory, HumanMessage, AiMessage
 class SQLDatabaseChainExecutor:
     db_chain: SQLDatabaseChain
     memory: CustomMemory
-    chain_answer: dict = None
+    chain_answer: dict = {}
     debug: bool = False
     langchain_debug: bool = False
     verbose: bool = False
@@ -25,18 +25,6 @@ class SQLDatabaseChainExecutor:
         self.db_chain.verbose = self.verbose
         self.db_chain.return_intermediate_steps = self.return_intermediate_steps
         self.last_intermediate_steps = None
-
-    @staticmethod
-    def _parse_table_from_str(text):
-        pattern_replacement = (
-            (r"(?<=[[ ])\((?=')", "["),
-            (r"(?<=\))\)", "]"),
-            (r"\'", '"'),
-        )
-        text_mod = text
-        for pattern, repl in pattern_replacement:
-            text_mod = re.sub(pattern, repl, text_mod)
-        return json.loads(text_mod)
 
     def run(self, query):
         query_with_chat_history = self.memory.get_memory() + query
@@ -71,27 +59,31 @@ class SQLDatabaseChainExecutor:
 
         return self
 
-    def get_answer(self) -> Optional[str | None]:
+    def get_answer(self) -> str | None:
         if isinstance(self.chain_answer, dict):
             return self.chain_answer.get("Answer")
         else:
             return self.chain_answer
 
-    def get_df(self) -> Optional[pd.DataFrame | None]:
-        sqlres = self.chain_answer.get("SQLResult")
+    def get_df(self) -> pd.DataFrame | None:
+        sqlres = (
+            self.chain_answer.get("SQLResult")
+            if isinstance(self.chain_answer, dict)
+            else None
+        )
         return (
             pd.DataFrame(sqlres)
             if sqlres and isinstance(sqlres, (dict, list))
             else None
         )
 
-    def get_all(self) -> Tuple[Optional[str | None], Optional[pd.DataFrame | None]]:
+    def get_all(self) -> Tuple[str | None, pd.DataFrame | None]:
         return self.get_answer(), self.get_df()
 
     def get_chat_history_size(self) -> int:
         return self.db_chain.llm_chain.llm.get_num_tokens(self.memory.get_memory())
 
-    def get_last_intermediate_steps(self) -> List[Optional[Dict | str]]:
+    def get_last_intermediate_steps(self) -> List[Dict | str]:
         return self.last_intermediate_steps
 
     def reset(self) -> None:

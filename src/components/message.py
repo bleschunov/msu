@@ -32,8 +32,7 @@ class SqlCode(MessageContent):
     def get(self) -> str:
         if self.content:
             return f"~~~sql\n{self.content}\n~~~"
-        else:
-            return ""
+        return ""
 
 
 @dataclass
