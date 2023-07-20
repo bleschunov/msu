@@ -21,6 +21,8 @@ Answer: Final answer here
 table_description = """
 Some of the columns in the table:
 "Тип документа" — possible values are "Списание", "Перемещение_Приход", "Перемещение_Расход", "Поступление"
+"Банковский счет.МСУ вид банковского счета" — possible values are "ОБС", "Проектный", "УФК МО", "Департамент финансов Москва", "УФК Москва", "Расчетный"
+"План/Факт" — possible values are "План", "Факт"
 """
 
 json_prompt = """
