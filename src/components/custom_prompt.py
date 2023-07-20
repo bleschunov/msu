@@ -18,6 +18,13 @@ SQLResult: Result of the SQLQuery
 Answer: Final answer here
 """
 
+table_description = """
+Some of the columns in the table:
+"Тип документа" — possible values are "Списание", "Перемещение_Приход", "Перемещение_Расход", "Поступление"
+"Банковский счет.МСУ вид банковского счета" — possible values are "ОБС", "Проектный", "УФК МО", "Департамент финансов Москва", "УФК Москва", "Расчетный"
+"План/Факт" — possible values are "План", "Факт"
+"""
+
 json_prompt = """
 Return answer in proper json format with the following keys:
 
@@ -27,5 +34,5 @@ Answer: Final answer here
 
 custom_prompt = PromptTemplate(
     input_variables=["input", "table_info", "top_k"],
-    template=_custom_prompt + json_prompt + _prompt_suffix,
+    template=_custom_prompt + table_description + json_prompt + _prompt_suffix,
 )
