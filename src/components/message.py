@@ -22,12 +22,16 @@ class SimpleText(MessageContent):
 
 class Table(MessageContent):
     def get(self) -> str:
-        return self.content.to_markdown(index=False, floatfmt=".3f")
+        if self.content is not None and any(self.content):
+            return self.content.to_markdown(index=False, floatfmt=".3f")
+        return ""
 
 
 class SqlCode(MessageContent):
     def get(self) -> str:
-        return f"~~~sql\n{self.content}\n~~~"
+        if self.content:
+            return f"~~~sql\n{self.content}\n~~~"
+        return ""
 
 
 @dataclass
@@ -40,5 +44,7 @@ class Message:
         self.key = uuid.uuid4().hex
 
     def display(self):
-        message_content = "\n".join(message_content.get() for message_content in self.content_items)
+        message_content = "\n".join(
+            message_content.get() for message_content in self.content_items
+        )
         message(message_content, self.is_user, key=self.key)
