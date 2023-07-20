@@ -12,7 +12,7 @@ from components.custom_memory import CustomMemory, HumanMessage, AiMessage
 class SQLDatabaseChainExecutor:
     db_chain: SQLDatabaseChain
     memory: CustomMemory
-    chain_answer: dict = dataclasses.field(default_factory=dict)
+    chain_answer: any = dataclasses.field(default_factory=dict)
     debug: bool = False
     langchain_debug: bool = False
     verbose: bool = False
@@ -57,7 +57,7 @@ class SQLDatabaseChainExecutor:
 
         return self
 
-    def get_answer(self) -> dict:
+    def get_answer(self) -> str:
         if isinstance(self.chain_answer, dict):
             return self.chain_answer.get("Answer")
         else:
@@ -75,7 +75,7 @@ class SQLDatabaseChainExecutor:
             else None
         )
 
-    def get_all(self) -> tuple[dict, pd.DataFrame | None]:
+    def get_all(self) -> tuple[str, pd.DataFrame | None]:
         return self.get_answer(), self.get_df()
 
     def get_chat_history_size(self) -> int:
