@@ -24,8 +24,7 @@ class Table(MessageContent):
     def get(self) -> str:
         if self.content is not None and any(self.content):
             return self.content.to_markdown(index=False, floatfmt=".3f")
-        else:
-            return ""
+        return ""
 
 
 class SqlCode(MessageContent):
