@@ -5,9 +5,9 @@ _prompt_suffix = """Only use the following tables:
 
 Question: {input}"""
 
-_custom_prompt = """You are an MS SQL expert. Given an input question, first create a syntactically correct MS SQL query to run, then look at the results of the query and return the answer to the input question.
-Unless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the TOP clause as per MS SQL. You can order the results to return the most informative data in the database.
-Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in square brackets ([]) to denote them as delimited identifiers.
+_custom_prompt = """You are an PostgreSQL expert. Given an input question, first create a syntactically correct PostgreSQL query to run, then look at the results of the query and return the answer to the input question.
+Unless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the TOP clause as per PostgreSQL. You can order the results to return the most informative data in the database.
+Never query for all columns from a table. You must query only the columns that are needed to answer the question.
 Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Limit results to top 5 unless otherwise noted.
 
 Use the following format:
@@ -16,13 +16,6 @@ Question: Question here
 SQLQuery: SQL Query to run
 SQLResult: Result of the SQLQuery
 Answer: Final answer here
-"""
-
-table_description = """
-Some of the columns in the table:
-"Тип документа" — possible values are "Списание", "Перемещение_Приход", "Перемещение_Расход", "Поступление"
-"Банковский счет.МСУ вид банковского счета" — possible values are "ОБС", "Проектный", "УФК МО", "Департамент финансов Москва", "УФК Москва", "Расчетный"
-"План/Факт" — possible values are "План", "Факт"
 """
 
 json_prompt = """
@@ -34,5 +27,5 @@ Answer: Final answer here
 
 custom_prompt = PromptTemplate(
     input_variables=["input", "table_info", "top_k"],
-    template=_custom_prompt + table_description + json_prompt + _prompt_suffix,
+    template=_custom_prompt + json_prompt + _prompt_suffix,
 )
