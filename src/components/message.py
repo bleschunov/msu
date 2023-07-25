@@ -45,6 +45,6 @@ class Message:
 
     def display(self):
         message_content = "\n".join(
-            message_content.get() for message_content in self.content_items
+            message_content.get() or "" for message_content in self.content_items
         )
         message(message_content, self.is_user, key=self.key)
