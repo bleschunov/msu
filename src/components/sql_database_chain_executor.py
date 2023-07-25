@@ -59,7 +59,7 @@ class SQLDatabaseChainExecutor:
 
     def get_answer(self) -> str:
         if isinstance(self.chain_answer, dict):
-            return self.chain_answer.get("Answer")
+            return str(self.chain_answer.get("Answer"))
         else:
             return self.chain_answer
 
