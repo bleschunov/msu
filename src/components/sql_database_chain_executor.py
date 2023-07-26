@@ -30,7 +30,9 @@ class SQLDatabaseChainExecutor:
             if self.return_intermediate_steps:
                 db_chain_response = self.db_chain(query_with_chat_history)
                 chain_answer = db_chain_response.get("result", None)
-                self.last_intermediate_steps = db_chain_response.get("intermediate_steps", None)
+                self.last_intermediate_steps = db_chain_response.get(
+                    "intermediate_steps", None
+                )
             else:
                 chain_answer = self.db_chain.run(query_with_chat_history)
         except Exception as e:
@@ -64,16 +66,16 @@ class SQLDatabaseChainExecutor:
             return self.chain_answer
 
     def get_df(self) -> pd.DataFrame | None:
-        sql_result = (
-            self.chain_answer.get("SQLResult")
-            if isinstance(self.chain_answer, dict)
+        steps = self.get_last_intermediate_steps()
+        df = (
+            pd.DataFrame(
+                steps[3], columns=steps[3][0].keys() if len(steps[3]) > 0 else None
+            )
+            if len(steps) >= 4
             else None
         )
-        return (
-            pd.DataFrame(sql_result)
-            if sql_result and isinstance(sql_result, (dict, list))
-            else None
-        )
+
+        return df
 
     def get_all(self) -> tuple[str, pd.DataFrame | None]:
         return self.get_answer(), self.get_df()
