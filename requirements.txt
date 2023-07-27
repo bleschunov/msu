@@ -1,7 +1,7 @@
 streamlit-chat
 langchain
 openai
-pyodbc
+psycopg2-binary
 tiktoken
 pandas
 tabulate
