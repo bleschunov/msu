@@ -3,6 +3,7 @@ import streamlit as st
 from components.custom_memory import custom_memory
 from components.message import SimpleText, Message, SqlCode, Table
 from components.sql_database_chain_executor import SQLDatabaseChainExecutor
+from tools.message_manager import MessageManager
 
 SESS_STATE = st.session_state
 messages_container = st.container()
@@ -47,17 +48,13 @@ def on_input():
 
         st.session_state["input_text"] = ""
 
-        answer, df = SESS_STATE.sql_chain_executor.run(query).get_all()
+        SESS_STATE.sql_chain_executor.run(query)
 
+        answer = SESS_STATE.sql_chain_executor.get_answer()
         intermediate_steps = SESS_STATE.sql_chain_executor.get_last_intermediate_steps()
-        answer_message = Message(
-            [
-                SimpleText(answer),
-                SqlCode(intermediate_steps[1] if intermediate_steps else None),
-                Table(df),
-            ],
-            is_user=False,
-        )
+        df = SESS_STATE.sql_chain_executor.get_df()
+
+        answer_message = MessageManager.create_answer_message(answer, intermediate_steps, df)
         st.session_state.msg_list.append(answer_message)
 
         with messages_container:
