@@ -30,14 +30,7 @@ Some of the columns in the table:
 "Сумма договора" — contract amount.
 """
 
-json_prompt = """
-Return answer in proper json format with the following keys:
-
-SQLResult: Result of the SQLQuery
-Answer: Final answer here
-"""
-
 custom_prompt = PromptTemplate(
     input_variables=["input", "table_info", "top_k"],
-    template=_custom_prompt + _prompt_suffix,
+    template=_custom_prompt + table_description + _prompt_suffix,
 )
