@@ -15,7 +15,7 @@ llm = ChatOpenAI(
     temperature=0,
     verbose=False,
     max_tokens=None,
-    model_name="gpt-4",  # gpt-3.5-turbo-16k"
+    model_name="gpt-3.5-turbo-16k"
 )
 
 # Создаём цепочку для работы с SQL
