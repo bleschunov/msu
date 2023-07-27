@@ -65,6 +65,7 @@ class SQLDatabaseChainExecutor:
         else:
             return self.chain_answer
 
+    # TODO: убрать магические числа, можно описать структуру steps, а можно взять числа в переменные с говорящими именами
     def get_df(self) -> pd.DataFrame | None:
         steps = self.get_last_intermediate_steps()
         df = (
