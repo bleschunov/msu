@@ -1,9 +1,12 @@
+import os
 import uuid
 from abc import abstractmethod
 from dataclasses import dataclass
 
 import pandas as pd
 from streamlit_chat import message
+
+from const import USER_AVATAR_URL, BOT_AVATAR_URL
 
 
 @dataclass
@@ -47,4 +50,5 @@ class Message:
         message_content = "\n".join(
             message_content.get() or "" for message_content in self.content_items
         )
-        message(message_content, self.is_user, key=self.key)
+        avatar_url = USER_AVATAR_URL if self.is_user else BOT_AVATAR_URL
+        message(message_content, self.is_user, key=self.key, logo=avatar_url)
