@@ -1,0 +1,2 @@
+BOT_AVATAR_URL="https://lh3.googleusercontent.com/u/0/drive-viewer/AITFw-w7UFbg-Q-ydQsys8lQO9RiwuirqhOGhZqIktewwFWslATfk1_UTHdbG4zktFTAjjug4z7XLd9ACMOpkVuESiuOylbtpw=w2794-h1578"
+USER_AVATAR_URL="https://lh3.googleusercontent.com/u/0/drive-viewer/AITFw-w2q-5JHPOLQdjf3TnniHy0EKx5tMELAAsoCBSIajBfMnDxCiW6dPtdP7tqTGVnXq5IKEQWN2c-2J8h3BehwNuuGzxvHA=w2840-h1630"
