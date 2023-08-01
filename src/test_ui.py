@@ -3,7 +3,7 @@ import uuid
 import streamlit as st
 from streamlit_chat import message
 
-from testing.tests import supabase
+from testing.main import supabase
 
 st.set_page_config(layout="wide")
 
