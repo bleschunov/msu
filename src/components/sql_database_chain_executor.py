@@ -4,7 +4,7 @@ import pandas as pd
 import langchain
 import dataclasses
 
-from langchain import SQLDatabaseChain
+from langchain_experimental.sql import SQLDatabaseChain
 from components.custom_memory import CustomMemory, HumanMessage, AiMessage
 
 
