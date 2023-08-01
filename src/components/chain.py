@@ -6,7 +6,7 @@ from components.patched_database_class import SQLDatabasePatched
 
 # Создаём подключение к БД
 # include_tables используем для указания таблиц, с которыми хотим работать
-db = SQLDatabasePatched.from_uri(os.getenv("DB_URI"), include_tables=["test"])
+db = SQLDatabasePatched.from_uri(os.getenv("DB_URI"))
 
 # Создаём ЛЛМ–модель для работы цепочки для работы с SQL
 # max_tokens=-1 указывает, что лимит токенов будет подстраиватья под запрос динамически
