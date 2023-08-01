@@ -4,8 +4,37 @@ import pandas as pd
 import langchain
 import dataclasses
 
-from langchain import SQLDatabaseChain
+from langchain_experimental.sql import SQLDatabaseChain
 from components.custom_memory import CustomMemory, HumanMessage, AiMessage
+
+
+@dataclasses.dataclass
+class IntermediateSteps:
+    input: str | None
+    top_k: int | None
+    dialect: str | None
+    table_info: str | None
+    sql_query: str | None
+    sql_result: list[dict] | None
+    verbose_result: str | None
+
+    @classmethod
+    def from_chain_steps(cls, steps: list):
+        if steps:
+            desc = steps[0] if len(steps) > 0 else {}
+            sql_query = steps[1] if len(steps) > 1 else None
+            sql_result = steps[3] if len(steps) > 3 else None
+            verbose_result = steps[5] if len(steps) > 5 else None
+            return cls(
+                input=desc.get("input"),
+                top_k=desc.get("top_k"),
+                dialect=desc.get("dialect"),
+                table_info=desc.get("table_info"),
+                sql_query=sql_query,
+                sql_result=sql_result,
+                verbose_result=verbose_result,
+            )
+        return None
 
 
 @dataclasses.dataclass
@@ -30,8 +59,8 @@ class SQLDatabaseChainExecutor:
             if self.return_intermediate_steps:
                 db_chain_response = self.db_chain(query_with_chat_history)
                 chain_answer = db_chain_response.get("result", None)
-                self.last_intermediate_steps = db_chain_response.get(
-                    "intermediate_steps", None
+                self.last_intermediate_steps = IntermediateSteps.from_chain_steps(
+                    db_chain_response.get("intermediate_steps", None)
                 )
             else:
                 chain_answer = self.db_chain.run(query_with_chat_history)
@@ -65,15 +94,11 @@ class SQLDatabaseChainExecutor:
         else:
             return self.chain_answer
 
-    # TODO: убрать магические числа, можно описать структуру steps, а можно взять числа в переменные с говорящими именами
     def get_df(self) -> pd.DataFrame | None:
         steps = self.get_last_intermediate_steps()
-        df = (
-            pd.DataFrame(
-                steps[3], columns=steps[3][0].keys() if len(steps[3]) > 0 else None
-            )
-            if len(steps) >= 4
-            else None
+        df = pd.DataFrame(
+            steps.sql_result,
+            columns=steps.sql_result[0].keys() if steps.sql_result else None,
         )
 
         return df
@@ -84,7 +109,7 @@ class SQLDatabaseChainExecutor:
     def get_chat_history_size(self) -> int:
         return self.db_chain.llm_chain.llm.get_num_tokens(self.memory.get_memory())
 
-    def get_last_intermediate_steps(self) -> list[dict | str]:
+    def get_last_intermediate_steps(self) -> IntermediateSteps:
         return self.last_intermediate_steps
 
     def reset(self) -> None:
