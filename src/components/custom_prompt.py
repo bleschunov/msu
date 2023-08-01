@@ -18,14 +18,19 @@ SQLResult: Result of the SQLQuery
 Answer: Final answer here
 """
 
-json_prompt = """
-Return answer in proper json format with the following keys:
+table_description = """
+There is a company named MSU that works with many of counterparties. This is the table with payments of MSU.
+If there is "компания" mentioned in the query it is meant MSU.
 
-SQLResult: Result of the SQLQuery
-Answer: Final answer here
+Some of the columns in the table:
+"Тип документа" — possible values are "Списание", "Перемещение_Приход", "Перемещение_Расход", "Поступление"
+"Банковский счет.МСУ вид банковского счета" — possible values are "ОБС", "Проектный", "УФК МО", "Департамент финансов Москва", "УФК Москва", "Расчетный"
+"План/Факт" — possible values are "План", "Факт". Use "Факт" if there is not stated other in the query.
+"Сумма" — actual transfer amount of money. Negative value means it was sent to counterparty. Positive value mean it was sent to MSU.
+"Сумма договора" — contract amount.
 """
 
 custom_prompt = PromptTemplate(
     input_variables=["input", "table_info", "top_k"],
-    template=_custom_prompt + json_prompt + _prompt_suffix,
+    template=_custom_prompt + table_description + _prompt_suffix,
 )
