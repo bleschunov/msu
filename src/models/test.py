@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from utils.exclude_keys import exclude_keys
+
 
 @dataclass
 class Test:
@@ -13,6 +15,4 @@ class Test:
     id: int = None
 
     def get_obj(self):
-        res = self.__dict__
-        del res["id"]
-        return res
+        return exclude_keys(self.__dict__, {"id"})

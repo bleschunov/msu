@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from utils.exclude_keys import exclude_keys
+
 
 @dataclass
 class TestSet:
@@ -11,7 +13,4 @@ class TestSet:
     id: int = None
 
     def get_obj(self):
-        res = self.__dict__
-        del res["id"]
-        del res["created_at"]
-        return res
+        return exclude_keys(self.__dict__, {"id", "created_at"})
