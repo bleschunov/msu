@@ -5,6 +5,8 @@ from components.message import SimpleText, Message
 from components.sql_database_chain_executor import get_sql_database_chain_executor
 from components.message_manager import MessageManager
 
+st.set_page_config(layout="wide")
+
 SESS_STATE = st.session_state
 messages_container = st.container()
 
