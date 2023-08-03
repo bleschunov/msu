@@ -3,14 +3,32 @@ import uuid
 import streamlit as st
 from streamlit_chat import message
 
-from testing.main import supabase
+from components.supabase_repository import supabase_repository
 
 st.set_page_config(layout="wide")
 
-col1, col2 = st.columns(2)
+(_, test_sets), _ = supabase_repository.select_test_sets()
 
-tests, count = supabase.table("test").select("*").execute()
-tests = {t["name"]: t["id"] for t in tests[1]}
+
+def find_test_set_id_by_name(name: str) -> int:
+    return [test_set["id"] for test_set in test_sets if test_set["name"] == name][0]
+
+
+def get_test_set_names() -> tuple:
+    return tuple(test_set["name"] for test_set in test_sets)
+
+
+def find_test_by_question(question: str, tests: list[dict]) -> dict:
+    return [test for test in tests if test["question"] == question][0]
+
+
+def get_merged_answers(tests_a: list[dict], tests_b: list[dict]) -> list[tuple]:
+    result = []
+    for test_a in tests_a:
+        test_b = find_test_by_question(test_a["question"], tests_b)
+        result.append((test_a, test_b))
+
+    return result
 
 
 def create_case(answer):
@@ -26,36 +44,34 @@ with st.container() as container:
     with col1:
         st.selectbox(
             "Выберите первый тест для сравнения",
-            (name for name in tests),
-            key="first_test_name"
+            get_test_set_names(),
+            key="first_test_set_name"
         )
 
-        first_answers, _ = supabase.table("question").select("*")\
-            .eq("test_id", tests[st.session_state.first_test_name]).execute()
-        first_answers = first_answers[1]
+        (_, first_tests), _ = supabase_repository.select_test_by_test_set_id(
+                find_test_set_id_by_name(st.session_state.first_test_set_name)
+            )
 
     with col2:
         st.selectbox(
             "Выберите первый тест для сравнения",
-            (name for name in tests),
-            key="second_test_name"
+            get_test_set_names(),
+            key="second_test_set_name"
         )
 
-        second_answers, _ = supabase.table("question").select("*")\
-            .eq("test_id", tests[st.session_state.second_test_name]).execute()
-        second_answers = second_answers[1]
+        (_, second_tests), _ = supabase_repository.select_test_by_test_set_id(
+                find_test_set_id_by_name(st.session_state.second_test_set_name)
+            )
 
-    merged_answers = []
-    for first_answer in first_answers:
-        second_answer = [a for a in second_answers if a["question"] == first_answer["question"]][0]
-        merged_answers.append((first_answer, second_answer))
+    merged_answers = get_merged_answers(first_tests, second_tests)
 
-for first_answer, second_answer in merged_answers:
+
+for first_test, second_test in merged_answers:
     with st.container() as container:
         col1, col2 = st.columns(2)
 
         with col1:
-            create_case(first_answer)
+            create_case(first_test)
 
         with col2:
-            create_case(second_answer)
+            create_case(second_test)

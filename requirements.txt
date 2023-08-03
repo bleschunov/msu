@@ -8,3 +8,5 @@ pandas
 tabulate
 supabase
 psycopg2-binary
+streamlit
+postgrest

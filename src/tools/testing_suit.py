@@ -2,12 +2,12 @@ from components.chain import get_db, get_llm
 from components.message import SimpleText, SqlCode, Table
 from components.sql_database_chain_executor import get_sql_database_chain_executor
 from components.supabase_repository import supabase_repository
-from testing.models.test import Test
-from testing.models.test_set import TestSet
+from models.test import Test
+from models.test_set import TestSet
 
 
-TEST_SET_NAME = "gpt-4"
-TEST_SET_DESCRIPTION = ""
+TEST_SET_NAME = "testtesttest"
+TEST_SET_DESCRIPTION = "delete after test"
 CREATED_BY = "bleschunov"
 
 
@@ -54,7 +54,7 @@ def get_test_results(question: str, test_id: int = None) -> Test:
 
 
 if __name__ == "__main__":
-    questions = get_questions("questions.txt")
+    questions = get_questions("../data/questions.txt")
     questions_count = len(questions)
 
     test_set = TestSet(

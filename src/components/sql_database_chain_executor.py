@@ -7,7 +7,7 @@ import dataclasses
 from langchain.chat_models import ChatOpenAI
 from langchain_experimental.sql import SQLDatabaseChain
 
-from components.chain import db_chain, get_sql_database_chain_patched, get_llm, get_db
+from components.chain import get_sql_database_chain_patched
 from components.custom_memory import CustomMemory, HumanMessage, AiMessage, custom_memory
 from components.patched_database_class import SQLDatabasePatched
 

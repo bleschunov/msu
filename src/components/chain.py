@@ -5,6 +5,7 @@ from components.custom_prompt import custom_prompt
 from components.patched_sql_chain import SQLDatabaseChainPatched
 from components.patched_database_class import SQLDatabasePatched
 
+
 def get_db(tables: list[str] | tuple[str] = ("test")) -> SQLDatabasePatched:
     # Создаём подключение к БД
     # include_tables используем для указания таблиц, с которыми хотим работать
