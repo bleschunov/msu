@@ -9,8 +9,9 @@ from langchain.chat_models import ChatOpenAI
 from langchain_experimental.sql import SQLDatabaseChain
 
 from components.chain import get_sql_database_chain_patched
-from components.custom_memory import CustomMemory, HumanMessage, AiMessage, custom_memory
 from components.patched_database_class import SQLDatabasePatched
+from components.custom_memory import CustomMemory, HumanMessage, AiMessage
+from models.intermediate_steps import IntermediateSteps
 
 
 @dataclasses.dataclass
@@ -22,7 +23,7 @@ class SQLDatabaseChainExecutor:
     langchain_debug: bool = False
     verbose: bool = False
     return_intermediate_steps: bool = False
-    last_intermediate_steps: list[dict | str] = None
+    last_intermediate_steps: IntermediateSteps = None
 
     def __post_init__(self):
         langchain.debug = self.langchain_debug
@@ -40,8 +41,8 @@ class SQLDatabaseChainExecutor:
             if self.return_intermediate_steps:
                 db_chain_response = self.db_chain(query_with_chat_history, callbacks=callbacks)
                 chain_answer = db_chain_response.get("result", None)
-                self.last_intermediate_steps = db_chain_response.get(
-                    "intermediate_steps", None
+                self.last_intermediate_steps = IntermediateSteps.from_chain_steps(
+                    db_chain_response.get("intermediate_steps", None)
                 )
             else:
                 chain_answer = self.db_chain.run(
@@ -78,15 +79,11 @@ class SQLDatabaseChainExecutor:
         else:
             return self.chain_answer
 
-    # TODO: убрать магические числа, можно описать структуру steps, а можно взять числа в переменные с говорящими именами
     def get_df(self) -> pd.DataFrame | None:
         steps = self.get_last_intermediate_steps()
-        df = (
-            pd.DataFrame(
-                steps[3], columns=steps[3][0].keys() if len(steps[3]) > 0 else None
-            )
-            if len(steps) >= 4
-            else None
+        df = pd.DataFrame(
+            steps.sql_result,
+            columns=steps.sql_result[0].keys() if steps.sql_result else None,
         )
 
         return df
@@ -97,7 +94,7 @@ class SQLDatabaseChainExecutor:
     def get_chat_history_size(self) -> int:
         return self.db_chain.llm_chain.llm.get_num_tokens(self.memory.get_memory())
 
-    def get_last_intermediate_steps(self) -> list[dict | str]:
+    def get_last_intermediate_steps(self) -> IntermediateSteps:
         return self.last_intermediate_steps
 
     def reset(self) -> None:
