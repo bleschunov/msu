@@ -5,8 +5,12 @@ import langchain
 import dataclasses
 
 from langchain.callbacks import StdOutCallbackHandler
+from langchain.chat_models import ChatOpenAI
 from langchain_experimental.sql import SQLDatabaseChain
-from components.custom_memory import CustomMemory, HumanMessage, AiMessage
+
+from components.chain import get_sql_database_chain_patched
+from components.patched_database_class import SQLDatabasePatched
+from components.custom_memory import CustomMemory, HumanMessage, AiMessage, custom_memory
 from models.intermediate_steps import IntermediateSteps
 
 
@@ -95,3 +99,17 @@ class SQLDatabaseChainExecutor:
 
     def reset(self) -> None:
         self.memory.reset()
+
+
+def get_sql_database_chain_executor(
+    db: SQLDatabasePatched,
+    llm: ChatOpenAI,
+    debug=False,
+    return_intermediate_steps=True
+) -> SQLDatabaseChainExecutor:
+    return SQLDatabaseChainExecutor(
+        get_sql_database_chain_patched(db, llm),
+        custom_memory,
+        debug=debug,
+        return_intermediate_steps=return_intermediate_steps
+    )

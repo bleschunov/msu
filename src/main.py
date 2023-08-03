@@ -1,8 +1,9 @@
 import streamlit as st
 
-from components.custom_memory import custom_memory
-from components.message import SimpleText, Message, SqlCode, Table
-from components.sql_database_chain_executor import SQLDatabaseChainExecutor
+from components.chain import get_db, get_llm
+from components.message import SimpleText, Message
+from components.sql_database_chain_executor import get_sql_database_chain_executor
+from components.message_manager import MessageManager
 
 SESS_STATE = st.session_state
 messages_container = st.container()
@@ -15,11 +16,11 @@ def reprint_messages_from_msg_list():
 
 def initialize():
     if not SESS_STATE:
-        # slow imports made here
-        from components.chain import db_chain
-
-        SESS_STATE.sql_chain_executor = SQLDatabaseChainExecutor(
-            db_chain, custom_memory, debug=False, return_intermediate_steps=True
+        SESS_STATE.sql_database_chain_executor = get_sql_database_chain_executor(
+            get_db(tables=["test"]),
+            get_llm(model_name="gpt-3.5-turbo-16k"),
+            debug=False,
+            return_intermediate_steps=True
         )
 
         SESS_STATE.msg_list = []
@@ -30,7 +31,7 @@ def initialize():
 
 
 def reset():
-    SESS_STATE.sql_chain_executor.reset()
+    SESS_STATE.sql_database_chain_executor.reset()
 
     reset_message = Message([SimpleText("Контекст сброшен")], is_user=False)
     st.session_state.msg_list.append(reset_message)
@@ -47,17 +48,13 @@ def on_input():
 
         st.session_state["input_text"] = ""
 
-        answer, df = SESS_STATE.sql_chain_executor.run(query).get_all()
+        SESS_STATE.sql_database_chain_executor.run(query)
 
-        intermediate_steps = SESS_STATE.sql_chain_executor.get_last_intermediate_steps()
-        answer_message = Message(
-            [
-                SimpleText(answer),
-                SqlCode(intermediate_steps.sql_query),
-                Table(df),
-            ],
-            is_user=False,
-        )
+        answer = SESS_STATE.sql_database_chain_executor.get_answer()
+        intermediate_steps = SESS_STATE.sql_database_chain_executor.get_last_intermediate_steps()
+        df = SESS_STATE.sql_database_chain_executor.get_df()
+
+        answer_message = MessageManager.create_answer_message(answer, intermediate_steps, df)
         st.session_state.msg_list.append(answer_message)
 
         with messages_container:
@@ -79,6 +76,6 @@ with st.container():
     st.button("Сбросить контекст", on_click=reset)
     st.write(
         "История сообщений: "
-        + str(SESS_STATE.sql_chain_executor.get_chat_history_size())
+        + str(SESS_STATE.sql_database_chain_executor.get_chat_history_size())
         + " токенов из ~16K"
     )
