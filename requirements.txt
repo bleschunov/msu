@@ -1,6 +1,6 @@
 streamlit-chat
 langchain
-langchain-experimental
+langchain_experimental
 openai
 pyodbc
 tiktoken

@@ -1,5 +1,5 @@
 from langchain import SQLDatabase
-from langchain.utilities.sql_database import truncate_word, text
+from langchain.utilities.sql_database import text
 
 
 class SQLDatabasePatched(SQLDatabase):

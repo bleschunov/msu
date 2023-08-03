@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List
 from langchain import PromptTemplate, LLMChain
 from langchain_experimental.sql import SQLDatabaseChain
 from langchain.callbacks.manager import CallbackManagerForChainRun

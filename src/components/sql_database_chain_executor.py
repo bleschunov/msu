@@ -4,6 +4,7 @@ import pandas as pd
 import langchain
 import dataclasses
 
+from langchain.callbacks import StdOutCallbackHandler
 from langchain_experimental.sql import SQLDatabaseChain
 from components.custom_memory import CustomMemory, HumanMessage, AiMessage
 
@@ -55,15 +56,23 @@ class SQLDatabaseChainExecutor:
 
     def run(self, query):
         query_with_chat_history = self.memory.get_memory() + query
+
+        callbacks = []
+        if self.debug:
+            callbacks.append(StdOutCallbackHandler())
+
         try:
             if self.return_intermediate_steps:
-                db_chain_response = self.db_chain(query_with_chat_history)
+                db_chain_response = self.db_chain(query_with_chat_history, callbacks=callbacks)
                 chain_answer = db_chain_response.get("result", None)
                 self.last_intermediate_steps = IntermediateSteps.from_chain_steps(
                     db_chain_response.get("intermediate_steps", None)
                 )
             else:
-                chain_answer = self.db_chain.run(query_with_chat_history)
+                chain_answer = self.db_chain.run(
+                    query_with_chat_history,
+                    callbacks=callbacks
+                )
         except Exception as e:
             logging.error(e)
             chain_answer = "Произошла ошибка"
