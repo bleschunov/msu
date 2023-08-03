@@ -53,7 +53,7 @@ def on_input():
         answer_message = Message(
             [
                 SimpleText(answer),
-                SqlCode(intermediate_steps[1] if intermediate_steps else None),
+                SqlCode(intermediate_steps.sql_query),
                 Table(df),
             ],
             is_user=False,

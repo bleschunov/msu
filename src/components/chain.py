@@ -11,10 +11,7 @@ db = SQLDatabasePatched.from_uri(os.getenv("DB_URI"), include_tables=["test"])
 # Создаём ЛЛМ–модель для работы цепочки для работы с SQL
 # max_tokens=-1 указывает, что лимит токенов будет подстраиватья под запрос динамически
 llm = ChatOpenAI(
-    temperature=0,
-    verbose=False,
-    max_tokens=None,
-    model_name="gpt-3.5-turbo-16k"
+    temperature=0, verbose=False, max_tokens=None, model_name="gpt-3.5-turbo-16k"
 )
 
 # Создаём цепочку для работы с SQL
