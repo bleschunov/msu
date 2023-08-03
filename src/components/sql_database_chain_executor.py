@@ -10,7 +10,7 @@ from langchain_experimental.sql import SQLDatabaseChain
 
 from components.chain import get_sql_database_chain_patched
 from components.patched_database_class import SQLDatabasePatched
-from components.custom_memory import CustomMemory, HumanMessage, AiMessage
+from components.custom_memory import CustomMemory, HumanMessage, AiMessage, custom_memory
 from models.intermediate_steps import IntermediateSteps
 
 
