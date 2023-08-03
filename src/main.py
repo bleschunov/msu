@@ -1,8 +1,8 @@
 import streamlit as st
 
-from components.custom_memory import custom_memory
+from components.chain import get_db, get_llm
 from components.message import SimpleText, Message
-from components.sql_database_chain_executor import SQLDatabaseChainExecutor
+from components.sql_database_chain_executor import get_sql_database_chain_executor
 from components.message_manager import MessageManager
 
 SESS_STATE = st.session_state
@@ -16,11 +16,11 @@ def reprint_messages_from_msg_list():
 
 def initialize():
     if not SESS_STATE:
-        # slow imports made here
-        from components.chain import db_chain
-
-        SESS_STATE.sql_database_chain_executor = SQLDatabaseChainExecutor(
-            db_chain, custom_memory, debug=False, return_intermediate_steps=True
+        SESS_STATE.sql_database_chain_executor = get_sql_database_chain_executor(
+            get_db(tables=["test"]),
+            get_llm(model_name="gpt-3.5-turbo-16k"),
+            debug=False,
+            return_intermediate_steps=True
         )
 
         SESS_STATE.msg_list = []

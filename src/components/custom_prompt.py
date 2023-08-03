@@ -18,6 +18,8 @@ SQLResult: Result of the SQLQuery
 Answer: Final answer here
 """
 
+# TODO: 24 и 25 строчки, кажется, не нужны. Проверить это и удалить, если не нужны. Если не нужны, убрать и упоминание MSU
+# TODO: Возможно, стоит добавить пояснения для "Списание", "Перемещение_Приход", "Перемещение_Расход", "Поступление"
 table_description = """
 There is a company named MSU that works with many of counterparties. This is the table with payments of MSU.
 If there is "компания" mentioned in the query it is meant MSU.

@@ -1,6 +1,7 @@
 import os
-from langchain_experimental.sql import SQLDatabaseChain
 from langchain.chat_models import ChatOpenAI
+from langchain_experimental.sql import SQLDatabaseChain
+
 from components.custom_prompt import custom_prompt
 from components.patched_sql_chain import SQLDatabaseChainPatched
 from components.patched_database_class import SQLDatabasePatched
