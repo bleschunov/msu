@@ -1,7 +1,12 @@
 streamlit-chat
 langchain
+langchain_experimental
 openai
 pyodbc
 tiktoken
 pandas
 tabulate
+supabase
+psycopg2-binary
+streamlit
+postgrest
