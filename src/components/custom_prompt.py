@@ -30,9 +30,10 @@ Some of the columns in the table:
 "План/Факт" — possible values are "План", "Факт". Use "Факт" if there is not stated other in the query.
 "Сумма" — actual transfer amount of money. Negative value means it was sent to counterparty. Positive value mean it was sent to MSU.
 "Сумма договора" — contract amount.
+"Период" — date of the payment. Working with that column use construction like LEFT(CONVERT(NVARCHAR(256), DATEADD(MONTH, _, GETDATE()), 120), 7) + '%'
 """
 
 custom_prompt = PromptTemplate(
     input_variables=["input", "table_info", "top_k"],
-    template=_custom_prompt + table_description + _prompt_suffix,
+    template=_custom_prompt  + table_description + _prompt_suffix,
 )
