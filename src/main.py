@@ -75,7 +75,16 @@ with st.container():
         if submitted:
             on_input()
 
-    st.button("Сбросить контекст", on_click=reset)
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write(
+            "Если получаете в выдаче компании с пустым названием, попробуйте добавить в запрос слова: «Не учитывай NULL»"
+        )
+
+    with col2:
+        st.button("Сбросить контекст", on_click=reset)
+
     st.write(
         "История сообщений: "
         + str(SESS_STATE.sql_database_chain_executor.get_chat_history_size())
