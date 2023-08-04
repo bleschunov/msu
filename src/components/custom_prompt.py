@@ -35,5 +35,5 @@ Some of the columns in the table:
 
 custom_prompt = PromptTemplate(
     input_variables=["input", "table_info", "top_k"],
-    template=_custom_prompt  + table_description + _prompt_suffix,
+    template=_custom_prompt + table_description + _prompt_suffix,
 )
