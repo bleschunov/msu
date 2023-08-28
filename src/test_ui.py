@@ -34,7 +34,7 @@ def get_merged_answers(tests_a: list[dict], tests_b: list[dict]) -> list[tuple]:
 def create_case(answer):
     message(answer["question"], is_user=True, key=uuid.uuid4().hex)
 
-    answer_content = "\n".join([answer["answer"], answer["sql"], answer["table"]])
+    answer_content = "\n".join(filter(lambda x: x is not None, [answer["answer"], answer["sql"], answer["table"]]))
     message(answer_content, is_user=False, key=uuid.uuid4().hex)
 
 
