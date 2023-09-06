@@ -18,8 +18,13 @@ def get_test_set_names() -> tuple:
     return tuple(test_set["name"] for test_set in test_sets)
 
 
-def find_test_by_question(question: str, tests: list[dict]) -> dict:
-    return [test for test in tests if test["question"] == question][0]
+def find_test_by_question(question: str, tests: list[dict]) -> dict | None:
+    found = [test for test in tests if test["question"] == question]
+
+    if len(found) == 0:
+        return None
+
+    return found[0]
 
 
 def get_merged_answers(tests_a: list[dict], tests_b: list[dict]) -> list[tuple]:
@@ -31,7 +36,10 @@ def get_merged_answers(tests_a: list[dict], tests_b: list[dict]) -> list[tuple]:
     return result
 
 
-def create_case(answer):
+def create_case(answer: dict | None):
+    if answer is None:
+        return
+
     message(answer["question"], is_user=True, key=uuid.uuid4().hex)
 
     answer_content = "\n".join(filter(lambda x: x is not None, [answer["answer"], answer["sql"], answer["table"]]))
