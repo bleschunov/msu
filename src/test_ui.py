@@ -29,8 +29,12 @@ def find_test_by_question(question: str, tests: list[dict]) -> dict | None:
 
 def get_merged_answers(tests_a: list[dict], tests_b: list[dict]) -> list[tuple]:
     result = []
-    for test_a in tests_a:
-        test_b = find_test_by_question(test_a["question"], tests_b)
+
+    tests_a.sort(key=lambda test: test["id"])
+    tests_b.sort(key=lambda test: test["id"])
+
+    for i, test_a in enumerate(tests_a):
+        test_b = tests_b[i]
         result.append((test_a, test_b))
 
     return result
